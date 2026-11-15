@@ -1,7 +1,7 @@
 # pt1 deterministic — measurement report
 
-Machine: AMD Ryzen 9 5900X 12C/24T, 54 GB, WSL2. Code: commit 9afe9c6 (feature/pt1-deterministic,
-base d722e09). 24 threads, window 1e7. Raw rows: results.tsv.
+Machine: AMD Ryzen 9 5900X 12C/24T, 54 GB, WSL2. Code: PrimeAtlas commit
+[9afe9c6](https://github.com/Flaman55/primeAtlas/commit/9afe9c6) (now in `main`; base d722e09). 24 threads, window 1e7. Raw rows: results.tsv.
 
 **Prime counts agree on every row** (pt1-pss = pt1-bpsw = Kim = v7.2 for each floor/size). No mismatch.
 

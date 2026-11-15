@@ -15,8 +15,10 @@ probabilistic BPSW test by the pseudosquares test and proves it correct
   (table from `engine_pt_pss.h`, return values 1 / 0 / -1).
 
 The table of pseudosquares L_p (OEIS A002189) is an explicit assumption (`TableCorrect`). Its
-transcription is checked by `decide`: three typos in the C table (p = 229, 353, 359), each
-below the true value, so the table errs on the safe side. Correct values:
+transcription is checked by `decide`: three typos (p = 229, 353, 359), taken over from Table 1
+of Sorenson (ANTS-IX, 2010), each below the true value, so the table errs on the safe side. The
+Lean model keeps the table as it was; the C table was corrected in PrimeAtlas commit
+[`9afe9c6`](https://github.com/Flaman55/primeAtlas/commit/9afe9c6). Correct values:
 L_229 = 196640248121928601, L_353 = L_359 = 295363487400900310880401.
 
 `measurements/`: pt1-pss vs BPSW benchmarks and the n−1 smooth-part study (`REPORT.md`, raw
