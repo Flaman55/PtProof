@@ -1,0 +1,289 @@
+\documentclass[11pt]{amsart}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage[hidelinks]{hyperref}
+
+\setlength{\emergencystretch}{3em}
+
+\newcommand{\lean}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\fn}[1]{\mathrm{#1}}
+\newcommand{\leanref}[1]{\par\nopagebreak\smallskip
+  {\small\raggedright\noindent Lean: #1\par}\medskip}
+
+\newtheorem{theorem}{Theorem}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\title[Pseudosquares primality: a verified proof]{Deterministic primality for sieve survivors by the pseudosquares test:\\
+a formally verified proof and a checked table}
+\author{Artur Flamandzki}
+\date{}
+
+\begin{document}
+
+\begin{abstract}
+A partial sieve removes every number with a prime factor up to a bound $s$; its survivors are
+then tested for primality. We replace the usual probabilistic test by the pseudosquares test
+of Lukes, Patterson and Williams with Sorenson's sieve bound, and verify the whole argument in
+Lean~4 / Mathlib. We prove the bound in the form we use (an odd $n > 1$ with every prime factor
+above $s$, $n < L s$, that passes the pseudosquares conditions for the bases up to $p$ is a
+prime power, where $L$ bounds the pseudosquares for $p$ from below), its consequence for sieve
+survivors (with $n < (s+1)^4$, a survivor that passes and is neither a square nor a cube is
+prime), and that the test never rejects a prime. The same two properties are proved for a model
+of the C routine used in the PrimeAtlas engine, with the table of pseudosquares $L_p$,
+$p \le 373$, as its only assumption. The transcribed table is checked by the Lean kernel:
+every entry is $\equiv 1 \pmod 8$ and a quadratic residue of every odd prime up to $p$, except
+three entries, which are typographical errors that also appear in a published table; each erroneous value lies
+below the true one, so the test remained sound. Every statement in this paper is a theorem of
+the accompanying Lean formalization, which builds with no \lean{sorry} and uses only the axioms
+\lean{propext}, \lean{Quot.sound} and \lean{Classical.choice}.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+The PrimeAtlas engine lists primes in ranges far above $2^{64}$. One of its paths, \emph{pt1},
+sieves a range with the primes up to a bound $s$ and then tests each survivor. Every prime factor
+of a survivor exceeds $s$, and $s$ is chosen with $n < (s+1)^4$ for every $n$ in the range, so a
+survivor has at most three prime factors. A probabilistic test such as BPSW leaves open whether
+the reported numbers are prime. This paper replaces it by a test whose correctness is proved.
+
+The test is the pseudosquares test. The pseudosquare $L_p$ is the least non-square
+$N \equiv 1 \pmod 8$ that is a nonzero quadratic residue of every odd prime $q \le p$. Lukes,
+Patterson and Williams~\cite{lpw} showed that a number passing certain Euler-criterion conditions
+for the bases up to $p$ and lying below $L_p$ is a prime power; Sorenson~\cite{sorenson2006}
+extended the bound to $n < L_p s$ for numbers with no prime factor up to $s$, which is exactly the
+situation of sieve survivors. The values $L_p$ are known from large computations; the table used
+here is the one of~\cite{sorenson2010} for $p \le 373$.
+
+\subsection*{Contributions}
+\begin{enumerate}
+  \item[(C1)] A formal proof of the pseudosquares bound with the sieve bound $s$
+    (Theorem~\ref{thm:lpw}) and of its consequence for sieve survivors (Theorem~\ref{thm:prime}),
+    with the table of pseudosquares as an explicit hypothesis.
+  \item[(C2)] A formal proof that the test is complete: it never rejects a prime
+    (Theorem~\ref{thm:complete}).
+  \item[(C3)] Soundness and completeness of a model of the C routine of the engine, including
+    its use of a prefix of the bases and its tail loop (Theorem~\ref{thm:routine}).
+  \item[(C4)] A kernel check of the transcribed table (Theorem~\ref{thm:table}), which found three
+    typographical errors.
+\end{enumerate}
+
+\subsection*{Related work}
+Primality has been formalized mainly through certificates for individual primes: Pocklington
+certificates in Coq~\cite{coqprime}, Pratt certificates in Isabelle~\cite{pratt}, and
+Pocklington certificates in Lean~4 in the PrimeCert library~\cite{primecert}. These prove that a
+given number is prime. The present work instead proves a test that decides every sieve survivor
+of a range, without a certificate for each number. We found no earlier formalization of the
+pseudosquares test or of the bound of~\cite{lpw, sorenson2006}; this is a statement about our
+search, not a claim of priority.
+
+\subsection*{Notation}
+All numbers are natural numbers. $q^{e} \bmod n$ is the remainder of $q^e$ on division by $n$;
+``$\equiv -1$'' is written $= n - 1$, as in the formalization. A number $N$ is a
+\emph{nonzero square modulo $q$} if $q \nmid N$ and $N$ is a square in $\mathbb{Z}/q$.
+
+\section{Setting}
+
+\begin{definition}[Lower bound for the pseudosquares]
+For $p \ge 2$, a number $L$ \emph{bounds the pseudosquares for $p$ from below} if every
+$N < L$ with $N \equiv 1 \pmod 8$ that is a nonzero square modulo every odd prime $q \le p$ is a
+square. The pseudosquare $L_p$ is the largest such $L$.
+\end{definition}
+
+\begin{definition}[The pseudosquares conditions]
+For odd $n$ and $p \ge 2$:
+\begin{enumerate}
+  \item[(P1)] for every prime $q \le p$, $q^{(n-1)/2} \bmod n \in \{1, n-1\}$;
+  \item[(P2)] if $n \equiv 5 \pmod 8$, then $2^{(n-1)/2} \bmod n = n - 1$;
+  \item[(P3)] if $n \equiv 1 \pmod 8$, then $q^{(n-1)/2} \bmod n = n - 1$ for some prime
+    $q \le p$.
+\end{enumerate}
+\end{definition}
+
+\section{Results}\label{sec:results}
+
+\subsection*{T1 The pseudosquares bound with a sieve bound}
+\begin{theorem}\label{thm:lpw}
+Let $n > 1$ be odd, let every prime factor of $n$ exceed $s$, let $n < L s$, where $L$ bounds
+the pseudosquares for $p \ge 2$ from below, and let $n$ satisfy (P1)--(P3). Then $n = r^k$ for a
+prime $r$.
+\end{theorem}
+\leanref{\lean{lpw_sorenson}}
+
+The proof follows~\cite[Lemma~3.1]{sorenson2006}. Write $n - 1 = 2^e m$ with $m$ odd. For a prime
+factor $x$ of $n$ with $x - 1 = 2^f t$, $t$ odd, conditions (P1) and (P3) give $f \ge e$, and the
+Legendre symbol $(q \mid x)$ is $-1$ exactly when $q^{(n-1)/2} \bmod n = n - 1$ and $f = e$
+(\lean{factor_char}). If some factor has $f > e$, it is a nonzero square modulo every odd
+$q \le p$ and $\equiv 1 \pmod 8$, yet it lies below $L$: impossible (\lean{caseA}). If two
+distinct factors $r, d$ have $f = e$, they have the same quadratic character, so $r d$ is a
+non-square pseudosquare candidate below $L$ (\lean{caseB}). Hence $n$ has one prime factor.
+
+\subsection*{T2 Sieve survivors}
+\begin{theorem}\label{thm:prime}
+Under the hypotheses of Theorem~\ref{thm:lpw}, if moreover $n < (s+1)^4$ and $n$ is neither a
+square nor a cube, then $n$ is prime.
+\end{theorem}
+\leanref{\lean{prime_of_pss}}
+
+\subsection*{T3 Completeness}
+\begin{theorem}\label{thm:complete}
+Let $n$ be a prime, $n \ne 2$, $p < n$, and let $L$ bound the pseudosquares for $p$ from below.
+Then $n$ satisfies (P1) and (P2), and if $n \equiv 1 \pmod 8$ and $q^{(n-1)/2} \bmod n = 1$ for
+every prime $q \le p$, then $L \le n$.
+\end{theorem}
+\leanref{\lean{pss_complete}}
+
+\subsection*{T4 The C routine}
+The table has $74$ rows $(p_k, L_k)$, $k = 0, \dots, 73$, with $p_0 = 2, \dots, p_{73} = 373$.
+The routine $\fn{pssProve}(n, b)$ (result $1$: prime, $0$: composite, $-1$: undecided) checks
+(P1) for the first $b$ bases, then (P2), accepts when (P3) holds among the first $b$ bases or
+$n \not\equiv 1 \pmod 8$, rejects when $n < L_{b-1}$, and otherwise continues base by base
+through the rest of the table (\lean{tailProve}). Montgomery arithmetic is modelled as
+$x^e \bmod n$.
+
+\begin{theorem}\label{thm:routine}
+Assume the table is correct, that is, $L_k$ bounds the pseudosquares for $p_k$ from below for
+every $k$ (\lean{TableCorrect}). Let $1 \le b \le 74$.
+\begin{enumerate}
+  \item If $n > 1$ is odd, every prime factor of $n$ exceeds $s$, $n < (s+1)^4$,
+    $n < L_{b-1} s$, $n$ is neither a square nor a cube, and $\fn{pssProve}(n, b) = 1$, then $n$
+    is prime.
+  \item If $n$ is a prime with $n > 373$, then $\fn{pssProve}(n, b) \ne 0$.
+\end{enumerate}
+\end{theorem}
+\leanref{\lean{pssProve_sound}, \lean{pssProve_complete}}
+
+\subsection*{T5 The table}
+\begin{theorem}\label{thm:table}
+The bases $p_0, \dots, p_{73}$ are the $74$ primes up to $373$ in increasing order, and the
+$L_k$ are non-decreasing. For every $k$ except $k = 49, 70, 71$ ($p = 229, 353, 359$),
+$L_k \equiv 1 \pmod 8$ and $(L_k \bmod p_j)^{(p_j - 1)/2} \bmod p_j = 1$ for every
+$1 \le j \le k$. The three exceptions are
+\[
+  L_{49} = 196640148121928601, \qquad L_{70} = L_{71} = 295363187400900310880401;
+\]
+the first is divisible by $3$; each is below the corrected value
+\[
+  196640248121928601, \qquad 295363487400900310880401,
+\]
+and the corrected values pass the same check.
+\end{theorem}
+\leanref{\lean{tp_all_primes}, \lean{tp_succ}, \lean{tL_succ}, \lean{table_pseudosquares},
+\lean{table_typos}, \lean{table_corrected}}
+
+The erroneous digits are a $1$ in place of a $2$ in $L_{229}$ and a $1$ in place of a $4$ in
+$L_{353} = L_{359}$. They appear in Table~1 of~\cite{sorenson2010} (in the arXiv version; we found no erratum);
+the corrected values agree with the OEIS table~\cite{oeis}, and the corrected value of
+$L_{353}$ also appears in~\cite{sorenson2006}. The same three values occur in the table of the
+Pseudosquares Prime Sieve~\cite{walisch}. Because each
+erroneous value is smaller than the true one, a routine using the erroneous table accepts a subset
+of the numbers it would accept with the true table, so its soundness is not affected.
+
+\section{Use in the engine}
+
+On an AMD Ryzen~9 5900X (24 threads, windows of $10^7$), the deterministic path produced the
+same prime counts as the BPSW path and as the independent Pseudosquares Prime Sieve of
+Walisch~\cite{walisch} on every measured floor from $10^{25}$ to $10^{32}$, and as the engine's
+segmented sieve wherever that was run (up to $10^{30}$). The proof costs about nine times the BPSW test and is the whole cost of
+the path: $13$--$21$ million numbers per second. These measurements are not part of the formal
+results. With the table up to $L_{373}$ the path covers floors up to $10^{34}$ (at $10^{33}$ and
+$10^{34}$ with a larger sieve bound); floor $10^{35}$ needs pseudosquares beyond $L_{373}$.
+
+\section{The formalization}\label{sec:formalization}
+
+The formalization is a Lean~4~\cite{lean4} project built against Mathlib~\cite{mathlib}, both at
+version \lean{v4.35.0}. All results are in \lean{PtProof/PseudoSquares.lean}; the table checks
+are evaluated by the kernel with \lean{decide}. \lean{lake build} completes with no \lean{sorry},
+\lean{admit} or \lean{native_decide}, and the theorems depend only on the axioms
+\lean{propext}, \lean{Quot.sound} and \lean{Classical.choice}. To build:
+\begin{verbatim}
+lake exe cache get
+lake build
+\end{verbatim}
+
+\section{Use of AI}
+
+The decision to make the pt1 path deterministic, the choice of the pseudosquares test and the
+statements to be proved are the author's. Generative AI (Claude Opus 5.5, Anthropic, used through
+Claude Code) contributed in the following ways:
+\begin{itemize}
+  \item It wrote the Lean statements and proofs. The author checked the statements against the
+    engine; the correctness of the proofs rests on the Lean kernel.
+  \item It drafted this text. The author set its structure and the stated contributions.
+  \item It searched the literature and checked the identifiers of the references. The author
+    decided how the work is placed relative to that literature.
+\end{itemize}
+
+\begin{thebibliography}{99}
+
+\bibitem{coqprime}
+B.~Gr\'egoire, L.~Th\'ery and B.~Werner,
+\emph{A computational approach to Pocklington certificates in type theory},
+Functional and Logic Programming (FLOPS 2006), Lecture Notes in Computer Science 3945, 2006, 97--113,
+\href{https://doi.org/10.1007/11737414_8}{doi:10.1007/11737414\_8}.
+
+\bibitem{lpw}
+R.~F.~Lukes, C.~D.~Patterson and H.~C.~Williams,
+\emph{Some results on pseudosquares},
+Math. Comp. 65 (1996), 361--372,
+\href{https://doi.org/10.1090/S0025-5718-96-00678-3}{doi:10.1090/S0025-5718-96-00678-3}.
+
+\bibitem{mathlib}
+The mathlib Community,
+\emph{The Lean mathematical library},
+Proceedings of the 9th ACM SIGPLAN International Conference on Certified Programs and Proofs
+(CPP 2020), 367--381,
+\href{https://doi.org/10.1145/3372885.3373824}{doi:10.1145/3372885.3373824}.
+
+\bibitem{lean4}
+L.~de~Moura and S.~Ullrich,
+\emph{The Lean 4 theorem prover and programming language},
+Automated Deduction -- CADE 28, Lecture Notes in Computer Science, 2021, 625--635,
+\href{https://doi.org/10.1007/978-3-030-79876-5_37}{doi:10.1007/978-3-030-79876-5\_37}.
+
+\bibitem{oeis}
+OEIS Foundation Inc.,
+\emph{The On-Line Encyclopedia of Integer Sequences}, sequence A002189 (pseudosquares),
+\url{https://oeis.org/A002189}.
+
+\bibitem{pratt}
+S.~Wimmer and L.~Noschinski,
+\emph{Pratt's primality certificates},
+Archive of Formal Proofs, July 2013, ISSN 2150-914x,
+\url{https://isa-afp.org/entries/Pratt_Certificate.html}.
+
+\bibitem{primecert}
+B.~Mehta et al.,
+\emph{PrimeCert: primality certificates in Lean~4},
+\url{https://reservoir.lean-lang.org/@b-mehta/PrimeCert}.
+
+\bibitem{sorenson2006}
+J.~P.~Sorenson,
+\emph{The pseudosquares prime sieve},
+Algorithmic Number Theory (ANTS-VII), Lecture Notes in Computer Science 4076, 2006, 193--207,
+\href{https://doi.org/10.1007/11792086_15}{doi:10.1007/11792086\_15}.
+
+\bibitem{sorenson2010}
+J.~P.~Sorenson,
+\emph{Sieving for pseudosquares and pseudocubes in parallel using doubly-focused enumeration and
+wheel datastructures},
+Algorithmic Number Theory (ANTS-IX), Lecture Notes in Computer Science 6197, 2010, 331--339,
+\href{https://doi.org/10.1007/978-3-642-14518-6_26}{doi:10.1007/978-3-642-14518-6\_26};
+\href{https://arxiv.org/abs/1001.3316}{arXiv:1001.3316}.
+
+\bibitem{walisch}
+K.~Walisch,
+\emph{Pseudosquares Prime Sieve},
+\url{https://github.com/kimwalisch/Pseudosquares-Prime-Sieve}.
+
+\end{thebibliography}
+
+\end{document}
