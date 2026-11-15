@@ -1,7 +1,7 @@
 .lake/
 *.olean
 # private notes
-LIST_DO_SORENSONA.md
+SORENSON_LETTER.md
 # LaTeX build files
 *.aux
 *.log
