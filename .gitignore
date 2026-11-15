@@ -1,0 +1,15 @@
+.lake/
+*.olean
+# private notes
+LIST_DO_SORENSONA.md
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.toc
+# measurement binaries
+measurements/nminus1
+measurements/pt1det_bench

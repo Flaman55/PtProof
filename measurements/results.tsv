@@ -1,0 +1,81 @@
+# pt1 deterministic runs -- AMD Ryzen 9 5900X 12C/24T, 54 GB, WSL2; base d722e09 + branch feature/pt1-deterministic (uncommitted: PSS table fix + pss_decide)
+3	25	1e+07	1778279	173428	0.10471	0.29733	0.2347	5.8	(floor count B primes F>=n^1/2 F>=n^1/3 median_logF/logn secs)
+3	28	1e+07	10000000	155444	0.10331	0.29382	0.2316	6.1	(floor count B primes F>=n^1/2 F>=n^1/3 median_logF/logn secs)
+3	30	1e+07	31622776	144796	0.10298	0.29225	0.2317	6.3	(floor count B primes F>=n^1/2 F>=n^1/3 median_logF/logn secs)
+3	32	1e+07	100000000	136066	0.10206	0.29228	0.2312	6.6	(floor count B primes F>=n^1/2 F>=n^1/3 median_logF/logn secs)
+1	25	1e+09	100	pt1-pss	1778279	54	48.27	20.72M	147	17376254	sq+cube 99.6 ns/call, ~0.15% of thread time 
+1	25	1e+09	100	pt1-bpsw	1778279	54	6.33	157.93M	148	17376254	
+1	25	1e+09	100	pt1-none	1778279	54	0.49	2053.39M	148	39015827	primes column = survivors
+1	25	1e+09	100	pss-count(Kim)	-	p=227	35.00	28.57M	702	17376254	wall 35.0s
+1	25	1e+09	100	v7.2	-	-	12.10	82.63M	1399	17376254	wall 12.7s base_gen 0.0s
+1	26	1e+09	100	pt1-pss	3162277	59	55.94	17.88M	148	16705096	sq+cube 97.7 ns/call, ~0.12% of thread time 
+1	26	1e+09	100	pt1-bpsw	3162277	59	6.58	151.93M	148	16705096	
+1	26	1e+09	100	pt1-none	3162277	59	0.47	2150.54M	148	37515513	primes column = survivors
+1	26	1e+09	100	pss-count(Kim)	-	p=239	39.31	25.44M	702	16705096	wall 39.3s
+1	26	1e+09	100	v7.2	-	-	26.56	37.65M	1532	16705096	wall 27.1s base_gen 0.0s
+1	28	1e+09	100	pt1-pss	10000000	64	58.73	17.03M	149	15514691	sq+cube 93.7 ns/call, ~0.10% of thread time 
+1	28	1e+09	100	pt1-bpsw	10000000	64	6.45	155.13M	149	15514691	
+1	28	1e+09	100	pt1-none	10000000	64	0.45	2237.14M	150	34834880	primes column = survivors
+1	28	1e+09	100	pss-count(Kim)	-	p=281	44.36	22.54M	702	15514691	wall 44.4s
+1	28	1e+09	100	v7.2	-	-	137.77	7.26M	1797	15514691	wall 138.3s base_gen 0.0s
+1	30	1e+09	100	pt1-pss	31622776	68	64.31	15.55M	154	14473890	sq+cube 95.5 ns/call, ~0.09% of thread time 
+1	30	1e+09	100	pt1-bpsw	31622776	68	6.50	153.89M	154	14473890	
+1	30	1e+09	100	pt1-none	31622776	68	0.46	2183.41M	154	32510658	primes column = survivors
+1	30	1e+09	100	pss-count(Kim)	-	p=337	51.52	19.41M	778	14473890	wall 51.5s
+1	30	1e+09	100	v7.2	-	-	745.75	1.34M	2064	14473890	wall 746.3s base_gen 0.0s
+1	32	1e+09	100	pt1-pss	100000000	73	70.08	14.27M	169	13573489	sq+cube 99.7 ns/call, ~0.08% of thread time 
+1	32	1e+09	100	pt1-bpsw	100000000	73	6.95	143.80M	169	13573489	
+1	32	1e+09	100	pt1-none	100000000	73	0.67	1501.50M	169	30484719	primes column = survivors
+1	32	1e+09	100	pss-count(Kim)	-	p=367	56.30	17.76M	2162	13573489	wall 56.3s
+1	25	1e+10	1000	pt1-pss	1778279	54	475.19	21.04M	151	173728551	sq+cube 93.3 ns/call, ~0.14% of thread time 
+1	25	1e+10	1000	pt1-bpsw	1778279	54	63.29	158.00M	151	173728551	
+1	25	1e+10	1000	pt1-none	1778279	54	4.41	2267.57M	151	390136463	primes column = survivors
+1	25	1e+10	1000	pss-count(Kim)	-	p=227	340.14	29.40M	702	173728551	wall 340.1s
+1	25	1e+10	1000	v7.2	-	-	21.24	470.85M	7928	173728551	wall 21.9s base_gen 0.0s
+1	26	1e+10	1000	pt1-pss	3162277	59	558.75	17.90M	151	167026529	sq+cube 94.8 ns/call, ~0.12% of thread time 
+1	26	1e+10	1000	pt1-bpsw	3162277	59	65.90	151.75M	151	167026529	
+1	26	1e+10	1000	pt1-none	3162277	59	3.85	2599.43M	151	375118827	primes column = survivors
+1	26	1e+10	1000	pss-count(Kim)	-	p=239	392.44	25.48M	702	167026529	wall 392.4s
+1	26	1e+10	1000	v7.2	-	-	37.52	266.49M	7818	167026529	wall 38.2s base_gen 0.0s
+1	28	1e+10	1000	pt1-pss	10000000	64	594.91	16.81M	153	155111392	sq+cube 94.2 ns/call, ~0.10% of thread time 
+1	28	1e+10	1000	pt1-bpsw	10000000	64	64.22	155.73M	153	155111392	
+1	28	1e+10	1000	pt1-none	10000000	64	4.01	2495.01M	153	348313617	primes column = survivors
+1	28	1e+10	1000	pss-count(Kim)	-	p=281	443.11	22.57M	705	155111392	wall 443.1s
+1	28	1e+10	1000	v7.2	-	-	151.05	66.20M	8179	155111392	wall 151.7s base_gen 0.0s
+1	30	1e+10	1000	pt1-pss	31622776	68	648.63	15.42M	158	144758509	sq+cube 93.0 ns/call, ~0.09% of thread time 
+1	30	1e+10	1000	pt1-bpsw	31622776	68	65.60	152.45M	158	144758509	
+1	30	1e+10	1000	pt1-none	31622776	68	3.64	2748.01M	158	325118604	primes column = survivors
+1	30	1e+10	1000	pss-count(Kim)	-	p=337	520.08	19.23M	778	144758509	wall 520.1s
+1	30	1e+10	1000	v7.2	-	-	773.10	12.93M	8143	144758509	wall 773.7s base_gen 0.0s
+1	32	1e+10	1000	pt1-pss	100000000	73	695.65	14.38M	172	135707959	sq+cube 96.4 ns/call, ~0.08% of thread time 
+1	32	1e+10	1000	pt1-bpsw	100000000	73	67.07	149.11M	172	135707959	
+1	32	1e+10	1000	pt1-none	100000000	73	5.35	1868.46M	172	304798940	primes column = survivors
+1	32	1e+10	1000	pss-count(Kim)	-	p=367	580.11	17.24M	2162	135707959	wall 580.1s
+2	28	1e+09	100	pt1-pss	10000000	64	71.02	14.08M	150	15514691	sq+cube 207.2 ns/call, ~0.19% of thread time B = default x1
+2	28	1e+09	100	pt1-pss	40000000	61	64.98	15.39M	157	15514691	sq+cube 103.8 ns/call, ~0.10% of thread time B = default x4
+2	28	1e+09	100	pt1-pss	160000000	59	58.63	17.06M	181	15514691	sq+cube 94.5 ns/call, ~0.10% of thread time B = default x16
+2	28	1e+09	100	pt1-pss	640000000	59	56.87	17.59M	274	15514691	sq+cube 100.4 ns/call, ~0.11% of thread time B = default x64
+2	28	1e+09	100	pt1-pss	2560000000	54	55.41	18.05M	621	15514691	sq+cube 96.9 ns/call, ~0.11% of thread time B = default x256
+2	28	1e+09	100	pt1-pss	4294967295	54	57.17	17.49M	923	15514691	sq+cube 93.3 ns/call, ~0.11% of thread time B = default x429
+2	30	1e+09	100	pt1-pss	31622776	68	70.31	14.22M	154	14473890	sq+cube 101.9 ns/call, ~0.09% of thread time B = default x1
+2	30	1e+09	100	pt1-pss	126491104	67	67.26	14.87M	175	14473890	sq+cube 196.0 ns/call, ~0.18% of thread time B = default x4
+2	30	1e+09	100	pt1-pss	505964416	64	64.68	15.46M	249	14473890	sq+cube 120.8 ns/call, ~0.11% of thread time B = default x16
+2	30	1e+09	100	pt1-pss	2023857664	61	74.93	13.35M	526	14473890	sq+cube 98.3 ns/call, ~0.08% of thread time B = default x64
+2	30	1e+09	100	pt1-pss	4294967295	61	71.15	14.05M	923	14473890	sq+cube 97.8 ns/call, ~0.08% of thread time B = default x135
+2	32	1e+09	100	pt1-pss	100000000	73	72.64	13.77M	169	13573489	sq+cube 94.6 ns/call, ~0.07% of thread time B = default x1
+2	32	1e+09	100	pt1-pss	400000000	71	69.77	14.33M	229	13573489	sq+cube 95.4 ns/call, ~0.08% of thread time B = default x4
+2	32	1e+09	100	pt1-pss	1600000000	69	71.34	14.02M	450	13573489	sq+cube 95.4 ns/call, ~0.08% of thread time B = default x16
+2	32	1e+09	100	pt1-pss	4294967295	68	73.61	13.59M	922	13573489	sq+cube 93.3 ns/call, ~0.07% of thread time B = default x42
+2	33	1e+09	100	pt1-pss	177827941	0	0.00	0.00M	0	0	no bases: top/B >= L_373 B = default x1
+2	33	1e+09	100	pt1-pss	711311764	73	66.07	15.14M	287	13155690	sq+cube 92.6 ns/call, ~0.08% of thread time B = default x4
+2	33	1e+09	100	pt1-pss	2845247056	73	74.01	13.51M	671	13155690	sq+cube 94.1 ns/call, ~0.07% of thread time B = default x16
+2	33	1e+09	100	pt1-pss	4294967295	71	73.70	13.57M	922	13155690	sq+cube 96.1 ns/call, ~0.07% of thread time B = default x24
+2	34	1e+09	100	pt1-pss	316227766	0	0.00	0.00M	0	0	no bases: top/B >= L_373 B = default x1
+2	34	1e+09	100	pt1-pss	1264911064	0	0.00	0.00M	0	0	no bases: top/B >= L_373 B = default x4
+2	34	1e+09	100	pt1-pss	4294967295	73	76.95	13.00M	923	12773621	sq+cube 100.8 ns/call, ~0.07% of thread time B = default x13
+2	35	1e+09	100	pt1-pss	562341325	0	0.00	0.00M	0	0	no bases: top/B >= L_373 B = default x1
+2	35	1e+09	100	pt1-pss	2249365300	0	0.00	0.00M	0	0	no bases: top/B >= L_373 B = default x4
+2	35	1e+09	100	pt1-pss	4294967295	0	0.00	0.00M	0	0	no bases: top/B >= L_373 B = default x7
+4	28	1e+11	10000	v7.2	-	-	267.63	373.65M	11333	1551074651	wall 269.7s base_gen 0.0s
+4	29	1e+11	10000	v7.2	-	-	477.74	209.32M	11383	1497531426	wall 480.5s base_gen 0.0s
+4	30	1e+11	10000	v7.2	-	-	1058.58	94.47M	11436	1447605937	wall 1061.4s base_gen 0.0s
